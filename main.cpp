@@ -1,7 +1,28 @@
 #include<iostream>
 #include<string>
+#include<limits>
 
 #include "DeviceManager.h"
+
+std::string stringInput(const std::string& contextLine = "") {
+    std::string input;
+    std::cout << contextLine;
+    std::getline(std::cin, input);
+    return input;
+}
+
+std::pair<bool, int> int32Input(const std::string& contextLine = "") {
+    int value;
+    std::cout << contextLine;
+    if (!(std::cin >> value)) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        return std::make_pair(false, 0);
+    }
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    return std::make_pair(true, value);
+}
 
 int main() {
 
@@ -16,9 +37,12 @@ int main() {
     << "0. Exit\n" << std::endl;
 
     while (true) {
-        int command;
-        std::cout << "> ";
-        std::cin >> command;
+        std::pair<bool, int> inputRes = int32Input(">");
+        if (!inputRes.first) {
+            std::cout << "Invalid input format!\nEnter a number!\n" << std::endl;
+            continue;
+        }
+        int command = inputRes.second;
 
         switch (command) {
             case 0: {
@@ -26,9 +50,7 @@ int main() {
                 return 0;
             }
             case 1: {
-                std::string name;
-                std::cout << "Enter name: ";
-                std::cin >> name;
+                std::string name = stringInput("Enter name: ");
                 deviceManager.addDevice(name);
                 break;
             }
@@ -37,24 +59,30 @@ int main() {
                 break;
             }
             case 3: {
-                int id;
-                std::cout << "Enter ID: ";
-                std::cin >> id;
-                deviceManager.turnDeviceOn(id);
+                inputRes = int32Input("Enter ID: ");
+                if (!inputRes.first) {
+                    std::cout << "Invalid input format!\nEnter a number!" << std::endl;
+                    break;
+                }
+                deviceManager.turnDeviceOn(inputRes.second);
                 break;
             }
             case 4: {
-                int id;
-                std::cout << "Enter ID: ";
-                std::cin >> id;
-                deviceManager.turnDeviceOff(id);
+                inputRes = int32Input("Enter ID: ");
+                if (!inputRes.first) {
+                    std::cout << "Invalid input format!\nEnter a number!" << std::endl;
+                    break;
+                }
+                deviceManager.turnDeviceOff(inputRes.second);
                 break;
             }
             case 5: {
-                int id;
-                std::cout << "Enter ID: ";
-                std::cin >> id;
-                Device* device = deviceManager.findDeviceById(id);
+                inputRes = int32Input("Enter ID: ");
+                if (!inputRes.first) {
+                    std::cout << "Invalid input format!\nEnter a number!" << std::endl;
+                    break;
+                }
+                Device* device = deviceManager.findDeviceById(inputRes.second);
                 if (device == nullptr) {
                     std::cout << "Device not found!" << std::endl;
                     break;

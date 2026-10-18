@@ -8,14 +8,14 @@ bool DeviceManager::idIsValid(const int id) {
     return id <= devices.size() && id >= 1;
 }
 
-void DeviceManager::addDevice(const std::string& name) {
+int DeviceManager::addDevice(const std::string& name) {
     devices.emplace_back(std::make_shared<Device>(Device(
         devices.size() + 1,
         name,
         false
     )));
 
-    std::cout << "Device added! ID: " << devices.size() << std::endl;
+    return devices.size();
 }
 
 void DeviceManager::printAllDevices() const {

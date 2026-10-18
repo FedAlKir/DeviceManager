@@ -12,7 +12,7 @@ public:
     DeviceManager() = default;
     ~DeviceManager() = default;
 
-    void addDevice(const std::string& name);
+    int addDevice(const std::string& name);
     void printAllDevices() const;
     void turnDeviceOn(const int id);
     void turnDeviceOff(const int id);
