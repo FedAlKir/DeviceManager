@@ -19,7 +19,7 @@ public:
     Device* findDeviceById(const int id);
 
 private:
-    std::vector<std::shared_ptr<Device>> devices;
+    std::vector<Device> devices;
 
     bool idIsValid(const int id);
 };
