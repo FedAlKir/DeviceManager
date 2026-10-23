@@ -1,25 +1,29 @@
 #pragma once
 
 #include<iostream>
-#include<vector>
+#include<map>
 #include<string>
 #include<memory>
 
 #include "Device.h"
+#include "EDeviceType.h"
 
 class DeviceManager {
 public:
-    DeviceManager() = default;
+    DeviceManager();
     ~DeviceManager() = default;
 
-    int addDevice(const std::string& name);
+    int addDevice(const EDeviceType deviceType, const std::string& name);
+    bool removeDevice(const int id);
     void printAllDevices() const;
-    void turnDeviceOn(const int id);
-    void turnDeviceOff(const int id);
-    Device* findDeviceById(const int id);
+    void tickAllDevices();
+    bool turnDeviceOn(const int id);
+    bool turnDeviceOff(const int id);
+    Device* findDeviceById(const int id) const;
 
 private:
-    std::vector<Device> devices;
+    int nextDeviceId;
+    std::map<int, std::unique_ptr<Device>> devices;
 
-    bool idIsValid(const int id);
+    bool idIsValid(const int id) const;
 };

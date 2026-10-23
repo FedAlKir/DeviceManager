@@ -1,7 +1,9 @@
 #include<iostream>
+#include<utility>
 #include<string>
 #include<sstream>
 #include<stdexcept>
+#include<vector>
 
 #include "DeviceManager.h"
 
@@ -38,14 +40,22 @@ InputStatus int32Input(const std::string& contextLine, int& value) {
 
 int main() {
 
+    const std::vector<std::pair<std::string, EDeviceType>> deviceTypes = {
+        { "Temperature sensor", EDeviceType::TEMPERATURE_SENSOR },
+        { "GPS receiver", EDeviceType::GPS_RECEIVER },
+        { "Network monitor", EDeviceType::NETWORK_MONITOR }
+    };
+
     DeviceManager deviceManager;
 
     std::cout << "=== Device Manager ===\n\n"
     << "1. Add device\n"
-    << "2. Show devices\n"
-    << "3. Turn on device\n"
-    << "4. Turn off device\n"
-    << "5. Find device\n"
+    << "2. Show all devices\n"
+    << "3. Turn device ON\n"
+    << "4. Turn device OFF\n"
+    << "5. Update all devices (Tick)\n"
+    << "6. Find device by ID\n"
+    << "7. Remove device\n"
     << "0. Exit\n" << std::endl;
 
     while (true) {
@@ -70,7 +80,24 @@ int main() {
                     std::cout << "Device name cannot be empty!" << std::endl;
                     break;
                 }
-                std::cout << "Device added! ID: " << deviceManager.addDevice(name) << std::endl;
+
+                std::stringstream ss;
+                ss << "Enter a device type number:\n";
+                for (int i = 0; i < deviceTypes.size(); ++i) {
+                    ss << (i + 1) << ". " << deviceTypes[i].first << "\n";
+                }
+
+                int deviceTypeId;
+                inputStatus = int32Input(ss.str(), deviceTypeId);
+
+                if (inputStatus == InputStatus::Eof) return 0;
+                else if (inputStatus == InputStatus::Invalid) {
+                    std::cout << "Invalid input format!\nEnter a number!" << std::endl;
+                    break;
+                }
+
+                std::cout << "Device added! ID: "
+                << deviceManager.addDevice(deviceTypes[deviceTypeId - 1].second, name) << std::endl;
                 break;
             }
             case 2: {
@@ -80,43 +107,66 @@ int main() {
             case 3: {
                 int id;
                 inputStatus = int32Input("Enter ID: ", id);
-                if (inputStatus == InputStatus::Invalid) {
+                if (inputStatus == InputStatus::Eof) return 0;
+                else if (inputStatus == InputStatus::Invalid) {
                     std::cout << "Invalid input format!\nEnter a number!" << std::endl;
                     break;
                 }
-                if (inputStatus == InputStatus::Eof) return 0;
-                deviceManager.turnDeviceOn(id);
+                if (!deviceManager.turnDeviceOn(id)) std::cout << "Device ID invalid" << std::endl;
                 break;
             }
             case 4: {
                 int id;
                 inputStatus = int32Input("Enter ID: ", id);
-                if (inputStatus == InputStatus::Invalid) {
+                if (inputStatus == InputStatus::Eof) return 0;
+                else if (inputStatus == InputStatus::Invalid) {
                     std::cout << "Invalid input format!\nEnter a number!" << std::endl;
                     break;
                 }
-                if (inputStatus == InputStatus::Eof) return 0;
-                deviceManager.turnDeviceOff(id);
+                if (!deviceManager.turnDeviceOff(id)) std::cout << "Device ID invalid" << std::endl;
                 break;
             }
             case 5: {
+                deviceManager.tickAllDevices();
+                std::cout << "All devices updated!" << std::endl;
+                break;
+            }
+            case 6: {
                 int id;
                 inputStatus = int32Input("Enter ID: ", id);
+
+                if (inputStatus == InputStatus::Eof) return 0;
                 if (inputStatus == InputStatus::Invalid) {
                     std::cout << "Invalid input format!\nEnter a number!" << std::endl;
                     break;
                 }
-                if (inputStatus == InputStatus::Eof) return 0;
-                Device* device = deviceManager.findDeviceById(id);
+
+                const Device* device = deviceManager.findDeviceById(id);
                 if (device == nullptr) {
                     std::cout << "Device not found!" << std::endl;
                     break;
                 }
-                std::string deviceState;
-                if (device->enabled) deviceState = "ON";
-                else deviceState = "OFF";
 
-                std::cout << "ID: " << device->id << " | " << device->name << " | " << deviceState << std::endl;
+                std::cout << device->getInfo() << std::endl;
+                break;
+            }
+            case 7: {
+                int id;
+                inputStatus = int32Input("Enter ID: ", id);
+
+                if (inputStatus == InputStatus::Eof) return 0;
+                if (inputStatus == InputStatus::Invalid) {
+                    std::cout << "Invalid input format!\nEnter a number!" << std::endl;
+                    break;
+                }
+
+                if (!deviceManager.removeDevice(id)) {
+                    std::cout << "Device not found!" << std::endl;
+                }
+                else {
+                    std::cout << "Device deleted successfuly!" << std::endl;
+                }
+
                 break;
             }
             default: {

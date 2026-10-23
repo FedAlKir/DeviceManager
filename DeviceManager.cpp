@@ -1,57 +1,93 @@
 #include "DeviceManager.h"
+
 #include "Device.h"
+#include "EDeviceType.h"
+#include "TemperatureSensor.h"
+#include "GPSReceiver.h"
+#include "NetworkMonitor.h"
 
 #include<iostream>
 #include<memory>
 
-bool DeviceManager::idIsValid(const int id) {
-    return id <= devices.size() && id >= 1;
+bool DeviceManager::idIsValid(const int id) const {
+    return devices.find(id) != devices.end();
 }
 
-int DeviceManager::addDevice(const std::string& name) {
-    devices.emplace_back(
-        devices.size() + 1,
-        name,
-        false
-    );
+DeviceManager::DeviceManager() : nextDeviceId(1) {}
 
-    return devices.size();
+int DeviceManager::addDevice(const EDeviceType deviceType, const std::string& name) {
+    switch (deviceType) {
+        case EDeviceType::TEMPERATURE_SENSOR: {
+            devices[nextDeviceId++] = std::make_unique<TemperatureSensor>(
+                nextDeviceId,
+                deviceType,
+                name
+            );
+            break;
+        }
+        case EDeviceType::GPS_RECEIVER: {
+            devices[nextDeviceId++] = std::make_unique<GPSReceiver>(
+                nextDeviceId,
+                deviceType,
+                name
+            );
+            break;
+        }
+        case EDeviceType::NETWORK_MONITOR: {
+            devices[nextDeviceId++] = std::make_unique<NetworkMonitor>(
+                nextDeviceId,
+                deviceType,
+                name
+            );
+            break;
+        }
+        default: {
+            std::cerr << "UNKNOWN_DEVICE_TYPE_ERROR" << std::endl;
+        }
+    }
+
+    return nextDeviceId - 1;
+}
+
+bool DeviceManager::removeDevice(const int id) {
+    if (!idIsValid(id)) return false;
+
+    devices.erase(id);
+    return true;
 }
 
 void DeviceManager::printAllDevices() const {
-    for (const Device& device : devices) {
-        std::string deviceState;
-        if (device.enabled) deviceState = "ON";
-        else deviceState = "OFF";
-
-        std::cout << "ID: " << device.id << " | " << device.name << " | " << deviceState << std::endl;
+    for (const auto& [id, device] : devices) {
+        std::cout << device->getInfo() << std::endl;
     }
 }
 
-void DeviceManager::turnDeviceOn(const int id) {
-    if (!idIsValid(id)) {
-        std::cout << "Device ID invalid" << std::endl;
-        return;
+void DeviceManager::tickAllDevices() {
+    for (const auto& [id, device] : devices) {
+        device->tick();
     }
-
-    devices[id - 1].enabled = true;
-    std::cout << devices[id - 1].name << " is now ON" << std::endl;
 }
 
-void DeviceManager::turnDeviceOff(const int id) {
-    if (!idIsValid(id)) {
-        std::cout << "Device ID invalid" << std::endl;
-        return;
-    }
+bool DeviceManager::turnDeviceOn(const int id) {
+    if (!idIsValid(id)) return false;
 
-    devices[id - 1].enabled = false;
-    std::cout << devices[id - 1].name << " is now OFF" << std::endl;
+    devices[id]->turnOn();
+    std::cout << devices[id]->getName() << " is now ON" << std::endl;
+    return true;
 }
 
-Device* DeviceManager::findDeviceById(const int id) {
+bool DeviceManager::turnDeviceOff(const int id) {
+    if (!idIsValid(id)) return false;
+
+    devices[id]->turnOff();
+    std::cout << devices[id]->getName() << " is now OFF" << std::endl;
+    return true;
+}
+
+Device* DeviceManager::findDeviceById(const int id) const {
     if (!idIsValid(id)) {
         return nullptr;
     }
 
-    return &devices[id - 1];
+    return devices.find(id)->second.get();
 }
