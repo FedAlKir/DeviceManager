@@ -1,11 +1,14 @@
 #pragma once
 
 #include "EDeviceType.h"
+#include "rapidjson/document.h"
 
 #include<string>
+#include<sstream>
 
 class Device {
     public:
+        Device() = default;
         Device(const int id, const EDeviceType deviceType, const std::string name) : 
         id(id), 
         deviceType(deviceType), 
@@ -22,9 +25,15 @@ class Device {
         bool isEnabled() const { return enabled; }
 
         virtual void tick() = 0;
-        virtual std::string getInfo() const = 0;
+        virtual std::string getInfo() const;
         virtual void turnOn() { enabled = true; }
         virtual void turnOff() { enabled = false; }
+
+        static EDeviceType fromStrDeviceTypeToEnum(const char* deviceType);
+
+        virtual rapidjson::Value getJsonValue(rapidjson::Document::AllocatorType& alloc) const;
+        static bool jsonValueIsValid(const rapidjson::Value& val);
+        static bool tryRestoreFromJsonValue(const rapidjson::Value& val, Device& device);
     
     protected:
         int id;
@@ -32,9 +41,6 @@ class Device {
         std::string name;
         bool enabled;
         
-        std::string getEnabledStr() const {
-            if (enabled) return "ON";
-            return "OFF";
-        }
+        std::string getEnabledStr() const;
 
 };

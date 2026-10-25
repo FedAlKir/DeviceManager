@@ -56,6 +56,8 @@ int main() {
     << "5. Update all devices (Tick)\n"
     << "6. Find device by ID\n"
     << "7. Remove device\n"
+    << "8. Save data\n"
+    << "9. Restore data\n"
     << "0. Exit\n" << std::endl;
 
     while (true) {
@@ -167,6 +169,24 @@ int main() {
                     std::cout << "Device deleted successfuly!" << std::endl;
                 }
 
+                break;
+            }
+            case 8: {
+                if (!deviceManager.save()) {
+                    std::cout << "Devices backup failed" << std::endl;
+                }
+                else {
+                    std::cout << "Devices saved successfully" << std::endl;
+                }
+                break;
+            }
+            case 9: {
+                if (!deviceManager.restore()) {
+                    std::cout << "Devices restore failed" << std::endl;
+                }
+                else {
+                    std::cout << "Devices restored successfully" << std::endl;
+                }
                 break;
             }
             default: {

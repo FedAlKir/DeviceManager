@@ -21,6 +21,9 @@ public:
     bool turnDeviceOff(const int id);
     Device* findDeviceById(const int id) const;
 
+    bool save() const;
+    bool restore();
+
 private:
     int nextDeviceId;
     std::map<int, std::unique_ptr<Device>> devices;

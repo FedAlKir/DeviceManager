@@ -1,2 +1,5 @@
 *.exe
 .vscode
+tests.cpp
+data.txt
+save.json

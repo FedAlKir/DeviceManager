@@ -15,11 +15,33 @@ void TemperatureSensor::tick() {
 
 std::string TemperatureSensor::getInfo() const {
     std::stringstream ss;
-    ss
-    << "ID: " << id << "\n"
-    << "Name: " << name << "\n"
-    << "Type: " << getDeviceTypeStr() << "\n"
-    << "Power: " << getEnabledStr() << "\n"
+    ss << Device::getInfo()
     << "Temperature: " << temperature << " C\n";
     return ss.str();
+}
+
+rapidjson::Value TemperatureSensor::getJsonValue(rapidjson::Document::AllocatorType& alloc) const {
+    rapidjson::Value v = Device::getJsonValue(alloc);
+
+    v.AddMember("temperature", temperature, alloc);
+
+    return v;
+}
+
+bool TemperatureSensor::jsonValueIsValid(const rapidjson::Value& val) {
+    return (
+        Device::jsonValueIsValid(val) &&
+        val.HasMember("temperature")
+    );
+}
+
+bool TemperatureSensor::tryRestoreFromJsonValue(const rapidjson::Value& val, TemperatureSensor& device) {
+    if (
+        !Device::tryRestoreFromJsonValue(val, device) ||
+        !TemperatureSensor::jsonValueIsValid(val)
+    ) return false;
+
+    device.temperature = val["temperature"].GetFloat();
+
+    return true;
 }
