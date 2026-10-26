@@ -3,3 +3,7 @@
 tests.cpp
 data.txt
 save.json
+
+/build-debug/
+/build-release/
+CMakeUserPresets.json

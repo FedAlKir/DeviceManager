@@ -1,5 +1,5 @@
 #include "GPSReceiver.h"
-#include "rapidjson/document.h"
+#include "../external/rapidjson/document.h"
 
 #include<string>
 #include<sstream>

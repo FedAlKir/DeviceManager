@@ -1,5 +1,7 @@
 #include "TemperatureSensor.h"
 
+#include "../external/rapidjson/document.h"
+
 #include<string>
 #include<sstream>
 

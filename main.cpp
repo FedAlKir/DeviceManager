@@ -5,7 +5,7 @@
 #include<stdexcept>
 #include<vector>
 
-#include "DeviceManager.h"
+#include "Managers/DeviceManager.h"
 
 enum class InputStatus {
     Ok,

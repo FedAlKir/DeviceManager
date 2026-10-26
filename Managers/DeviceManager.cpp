@@ -6,10 +6,10 @@
 #include "GPSReceiver.h"
 #include "NetworkMonitor.h"
 
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/istreamwrapper.h"
-#include "rapidjson/ostreamwrapper.h"
+#include "../external/rapidjson/document.h"
+#include "../external/rapidjson/writer.h"
+#include "../external/rapidjson/istreamwrapper.h"
+#include "../external/rapidjson/ostreamwrapper.h"
 
 #include<iostream>
 #include<memory>

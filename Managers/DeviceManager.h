@@ -5,8 +5,8 @@
 #include<string>
 #include<memory>
 
-#include "Device.h"
-#include "EDeviceType.h"
+#include "../Devices/Device.h"
+#include "../Devices/EDeviceType.h"
 
 class DeviceManager {
 public:
