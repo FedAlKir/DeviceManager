@@ -23,6 +23,7 @@ add_executable(
     Devices/TemperatureSensor.cpp
 
     Managers/DeviceManager.cpp
+    Managers/EventLogger.cpp
 )
 
 target_include_directories(

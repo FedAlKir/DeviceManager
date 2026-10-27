@@ -24,31 +24,26 @@ DeviceManager::DeviceManager() : nextDeviceId(1) {}
 int DeviceManager::addDevice(const EDeviceType deviceType, const std::string& name) {
     switch (deviceType) {
         case EDeviceType::TEMPERATURE_SENSOR: {
-            devices[nextDeviceId++] = std::make_unique<TemperatureSensor>(
-                nextDeviceId,
-                deviceType,
-                name
-            );
+            TemperatureSensor d(nextDeviceId, deviceType, name);
+            devices[nextDeviceId++] = std::make_unique<TemperatureSensor>(d);
+            logger.logDeviceAddition(d.getId(), &d);
             break;
         }
         case EDeviceType::GPS_RECEIVER: {
-            devices[nextDeviceId++] = std::make_unique<GPSReceiver>(
-                nextDeviceId,
-                deviceType,
-                name
-            );
+            GPSReceiver d(nextDeviceId, deviceType, name);
+            devices[nextDeviceId++] = std::make_unique<GPSReceiver>(d);
+            logger.logDeviceAddition(d.getId(), &d);
             break;
         }
         case EDeviceType::NETWORK_MONITOR: {
-            devices[nextDeviceId++] = std::make_unique<NetworkMonitor>(
-                nextDeviceId,
-                deviceType,
-                name
-            );
+            NetworkMonitor d(nextDeviceId, deviceType, name);
+            devices[nextDeviceId++] = std::make_unique<NetworkMonitor>(d);
+            logger.logDeviceAddition(d.getId(), &d);
             break;
         }
         default: {
             std::cerr << "UNKNOWN_DEVICE_TYPE_ERROR" << std::endl;
+            logger.logDeviceAddition(nextDeviceId, nullptr);
         }
     }
 
@@ -56,9 +51,14 @@ int DeviceManager::addDevice(const EDeviceType deviceType, const std::string& na
 }
 
 bool DeviceManager::removeDevice(const int id) {
-    if (!idIsValid(id)) return false;
+    if (!idIsValid(id)) {
+        logger.logDeviceRemoving(id, nullptr);
+        return false;
+    }
 
+    logger.logDeviceRemoving(id, &*devices[id]);
     devices.erase(id);
+
     return true;
 }
 
@@ -72,20 +72,29 @@ void DeviceManager::tickAllDevices() {
     for (const auto& [id, device] : devices) {
         device->tick();
     }
+    logger.logDevicesUpdate();
 }
 
 bool DeviceManager::turnDeviceOn(const int id) {
-    if (!idIsValid(id)) return false;
+    if (!idIsValid(id)) {
+        logger.logDeviceActivation(id, nullptr);
+        return false;
+    }
 
     devices[id]->turnOn();
+    logger.logDeviceActivation(id, &*devices[id]);
     std::cout << devices[id]->getName() << " is now ON" << std::endl;
     return true;
 }
 
 bool DeviceManager::turnDeviceOff(const int id) {
-    if (!idIsValid(id)) return false;
+    if (!idIsValid(id)) {
+        logger.logDeviceDeactivation(id, nullptr);
+        return false;
+    }
 
     devices[id]->turnOff();
+    logger.logDeviceDeactivation(id, &*devices[id]);
     std::cout << devices[id]->getName() << " is now OFF" << std::endl;
     return true;
 }
@@ -98,7 +107,7 @@ Device* DeviceManager::findDeviceById(const int id) const {
     return devices.find(id)->second.get();
 }
 
-bool DeviceManager::save() const {
+bool DeviceManager::save() {
 
     rapidjson::Document document(rapidjson::kObjectType);
     auto& alloc = document.GetAllocator();
@@ -115,6 +124,7 @@ bool DeviceManager::save() const {
     
     if (!out.is_open()) {
         std::cout << "FILE_OPEN_ERROR" << std::endl;
+        logger.logSaving(false);
         return false;
     }
     
@@ -123,6 +133,7 @@ bool DeviceManager::save() const {
     document.Accept(writer);
 
     out.close();
+    logger.logSaving(true);
     return true;
 }
 
@@ -131,6 +142,7 @@ bool DeviceManager::restore() {
     
     if (!in.is_open()) {
         std::cout << "FILE_OPEN_ERROR" << std::endl;
+        logger.logRestoring(false);
         return false;
     }
 
@@ -143,7 +155,10 @@ bool DeviceManager::restore() {
         !document.HasMember("nextDeviceId") ||
         !document.HasMember("devices") ||
         document["devices"].GetType() != rapidjson::kArrayType
-    ) return false;
+    ) {
+        logger.logRestoring(false);
+        return false;
+    }
 
     nextDeviceId = document["nextDeviceId"].GetInt();
     devices.clear();
@@ -187,6 +202,8 @@ bool DeviceManager::restore() {
             }
         }
     }
+
+    logger.logRestoring(true);
 
     return true;
 }

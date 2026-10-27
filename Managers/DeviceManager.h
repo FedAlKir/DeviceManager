@@ -5,6 +5,7 @@
 #include<string>
 #include<memory>
 
+#include "EventLogger.h"
 #include "../Devices/Device.h"
 #include "../Devices/EDeviceType.h"
 
@@ -21,12 +22,16 @@ public:
     bool turnDeviceOff(const int id);
     Device* findDeviceById(const int id) const;
 
-    bool save() const;
+    void printAllLogs() { logger.printAllLogs(); }
+
+    bool save();
     bool restore();
 
 private:
     int nextDeviceId;
     std::map<int, std::unique_ptr<Device>> devices;
+    EventLogger logger;
+
 
     bool idIsValid(const int id) const;
 };

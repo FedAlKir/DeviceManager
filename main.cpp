@@ -2,7 +2,6 @@
 #include<utility>
 #include<string>
 #include<sstream>
-#include<stdexcept>
 #include<vector>
 
 #include "Managers/DeviceManager.h"
@@ -58,11 +57,14 @@ int main() {
     << "7. Remove device\n"
     << "8. Save data\n"
     << "9. Restore data\n"
-    << "0. Exit\n" << std::endl;
+    << "10. Print all logs\n"
+    << "0. Exit\n"
+    << std::endl;
 
     while (true) {
         int command;
         InputStatus inputStatus = int32Input(">", command);
+        std::cout << "\n";
         if (inputStatus == InputStatus::Invalid) {
             std::cout << "Invalid input format!\nEnter a number!\n" << std::endl;
             continue;
@@ -85,7 +87,7 @@ int main() {
 
                 std::stringstream ss;
                 ss << "Enter a device type number:\n";
-                for (int i = 0; i < deviceTypes.size(); ++i) {
+                for (size_t i = 0; i < deviceTypes.size(); ++i) {
                     ss << (i + 1) << ". " << deviceTypes[i].first << "\n";
                 }
 
@@ -187,6 +189,10 @@ int main() {
                 else {
                     std::cout << "Devices restored successfully" << std::endl;
                 }
+                break;
+            }
+            case 10: {
+                deviceManager.printAllLogs();
                 break;
             }
             default: {
